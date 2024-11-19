@@ -1,4 +1,4 @@
-# api-client
+# DashboardApp-Client
 
 ## Project setup
 ```
