@@ -17,8 +17,11 @@
                 </strong>
             </label>
 
-            <select>
+            <select v-model="productId">
                 <option value="" disabled selected>Select Product</option>
+                <option v-for="product in products" :key="product.id" :value="product.id">
+                    {{ product.product_name }} {{ product.id }}
+                </option>
             </select>
             
             <label>
@@ -30,20 +33,23 @@
                 </strong>
             </label>
 
-            <select>
+            <select v-model="customerId">
                 <option value="" disabled selected>Select Customer</option>
+                <option v-for="customer in customers" :key="customer.id" :value="customer.id">
+                    {{ customer.first_name }} {{ customer.last_name }}
+                </option>
             </select>
 
             <label>
                 <strong>
                     <small>
-                        Order Date
+                        Required Date
                         <span class="validation-mark">*</span>
                     </small>
                 </strong>
             </label>
 
-            <input type="date">
+            <input type="date" v-model="requiredDate">
             
             <label>
                 <strong>
@@ -114,7 +120,7 @@
             <div class="footer">
                 <div class="content">
                     <button class="cancel" @click="closeModal()">Cancel</button>
-                    <button class="confirm" @click="addNewRecord()">Confirm</button>
+                    <button :disabled="!buttonEnable" class="confirm" @click="addNewRecord()">Confirm</button>
                 </div>
             </div>
         </div>
@@ -124,7 +130,11 @@
 import Modal from '@/components/common/Modal.vue';
 
 import Close_Icon from '@/assets/icons/Close_Icon.vue';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onBeforeMount, ref, watch } from 'vue';
+import { loadCustomers } from '@/api/relations/customers';
+import { loadProducts } from '@/api/reporting/product';
+import { addNewOrder } from '@/api/reporting/order';
+import { IOrder } from '@/models/IOrder';
 
 export default defineComponent ({
     components: {
@@ -132,33 +142,93 @@ export default defineComponent ({
         Modal
     },
 
-    emits: ['close-modal'],
+    emits: ['close-modal', 'update-list'],
 
     setup(_, context) {
-        const buttonEnable = ref(false)
+        const buttonEnable = ref()
 
-        const productId = ref(false)
-        const customerId = ref(false)
-        const orderDate = ref(false)
-        const shippedName = ref(false)
-        const shippedBarangay = ref(false)
-        const shippedCity = ref(false)
-        const shippedProvince = ref(false)
-        const shippedCountry = ref(false)
-        const shippedPostalCode = ref(false)
+        const productId = ref('')
+        const customerId = ref('')
+        const requiredDate = ref('')
+        const shippedName = ref('')
+        const shippedBarangay = ref('')
+        const shippedCity = ref('')
+        const shippedProvince = ref('')
+        const shippedCountry = ref('')
+        const shippedPostalCode = ref('')
+
+        const customers = ref()
+        const products = ref()
+
+        watch(() => [customerId.value, productId.value, requiredDate.value, 
+                    shippedName.value, shippedBarangay.value, shippedCity.value,
+                    shippedProvince.value, shippedCountry.value, shippedPostalCode.value],
+                    ()=> {
+                        if(
+                            customerId.value === '' ||
+                            productId.value === '' ||
+                            requiredDate.value === '' ||
+                            shippedName.value === '' ||
+                            shippedBarangay.value === '' ||
+                            shippedCity.value === '' ||
+                            shippedProvince.value === '' ||
+                            shippedCountry.value === '' ||
+                            shippedPostalCode.value === ''
+                        ) {
+                            buttonEnable.value = false
+                        } else {
+                            buttonEnable.value = true
+                        }
+                    }
+        )
         
+        const getCustomers = async () => {
+            customers.value = await loadCustomers();
+            console.log(' download customers')
+        }
+        
+        const getProducts = async () => {
+            products.value = await loadProducts();
+            console.log(' download products')
+        }
+
         const addNewRecord = () => {
-            closeModal()
+            let newOrderRecord: Partial<IOrder> = {}
+                newOrderRecord.customerId = customerId.value;
+                newOrderRecord.productId = productId.value;
+                newOrderRecord.requiredDate = requiredDate.value;
+                newOrderRecord.shippedName = shippedName.value;
+                newOrderRecord.shippedBarangay = shippedBarangay.value;
+                newOrderRecord.shippedCity = shippedCity.value;
+                newOrderRecord.shippedProvince = shippedProvince.value;
+                newOrderRecord.shippedCountry = shippedCountry.value;
+                newOrderRecord.shippedPostalCode = shippedPostalCode.value;
+
+                addNewOrder(newOrderRecord).then(() => {
+                    updateList();
+                    closeModal();
+                })
         }
 
         const closeModal = () => {
-            context.emit('close-modal')
+            context.emit('close-modal');
         }
+
+        const updateList = () => {
+            context.emit('update-list');
+        }
+
+        onBeforeMount(() => {
+            getCustomers();
+            getProducts();
+        })
         
         return {
+            buttonEnable,
+
             productId,
             customerId,
-            orderDate,
+            requiredDate,
             shippedName,
             shippedBarangay,
             shippedCity,
@@ -166,8 +236,12 @@ export default defineComponent ({
             shippedCountry,
             shippedPostalCode,
 
+            customers,
+            products,
+
             addNewRecord,
-            closeModal
+            closeModal,
+            updateList
         }
     }
 })
