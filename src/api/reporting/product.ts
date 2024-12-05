@@ -56,8 +56,8 @@ export const editProduct = (id: string, editedProduct: Partial<IProduct>) => {
             unit_price: editedProduct.unitPrice,
             units_in_stock: editedProduct.unitsInStock,
             units_on_order: editedProduct.unitsOnOrder,
-            category: editedProduct.supplierId,
-            supplier: editedProduct.categoryId
+            category: editedProduct.supplier!.id,
+            supplier: editedProduct.category!.id
         })
         .then((response: AxiosResponse) => {
             if(response.status === 200) {
@@ -88,3 +88,22 @@ export const deleteProduct = (id: string) => {
         })
     });
 }
+
+export const getProductDetails = (productId: string) => {
+
+    return new Promise((resolve, reject) => {
+      api
+        .get(URLS.products + productId + "/") //, {}
+        .then((response: AxiosResponse) => {
+  
+          if (response.status === 200) {
+            resolve(response.data);
+          } else {
+            reject();
+          }
+        })
+        .catch((error: AxiosError) => {
+          console.log("caught error in product details >> ", error);
+        });
+    });
+  };

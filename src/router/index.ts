@@ -4,6 +4,8 @@ import OrdersView from '@/views/reporting/screens/OrdersView.vue'
 import ProductsView from '@/views/reporting/screens/ProductsView.vue'
 import SuppliersView from '@/views/reporting/screens/SuppliersView.vue'
 import CustomersView from '@/views/relations/screens/CustomersView.vue'
+import OrderDetails from '@/views/reporting/details/OrderDetails.vue'
+import ProductDetails from '@/views/reporting/details/ProductDetails.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -19,10 +21,22 @@ const routes: Array<RouteRecordRaw> = [
         meta: { screen: "orders" }
       },
       {
+        path: '/orders/:id',
+        name: 'order-details',
+        component: OrderDetails,
+        meta: { screen: "order-details" }
+      },
+      {
         path: '/products',
         name: 'products',
         component: ProductsView,
         meta: { screen: "products" }
+      },
+      {
+        path: '/products/:id',
+        name: 'product-details',
+        component: ProductDetails,
+        meta: { screen: "product-details" }
       },
       {
         path: '/suppliers',

@@ -19,6 +19,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>ID</th>
                     <th>Product Name</th>
                     <th>Category</th>
@@ -30,7 +31,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, i) in products" :key="1">
+                <tr v-for="(item, i) in products" :key="1" @click="openProductDetails(item)">
+                    <td>{{ i+1 }}</td>
                     <td>{{ item.id }}</td>
                     <td>{{ item.product_name }}</td>
                     <td>{{ item.category.name }} -- {{ item.category.id }}</td>
@@ -40,10 +42,10 @@
                     <td>{{ item.units_on_order }}</td>
                     <td>
                         <span>
-                            <Edit_Icon class="table-icon" @click="openEditProductModal(item.id)"/>
+                            <Edit_Icon class="table-icon" @click.stop @click="openEditProductModal(item.id)"/>
                         </span>
                         <span>
-                            <Trash_Icon class="table-icon__left" @click="openDeleteModal(item.id)"/>
+                            <Trash_Icon class="table-icon__left" @click.stop @click="openDeleteModal(item.id)"/>
                         </span>
                     </td>
                 </tr>
@@ -53,7 +55,7 @@
 </template>
 <script lang="ts">
 import { loadProducts, editProduct, deleteProduct } from '@/api/reporting/product';
-import { defineComponent, onMounted, ref, toRaw } from 'vue';
+import { computed, defineComponent, onMounted, ref, toRaw } from 'vue';
 
 import Edit_Icon from '@/assets/icons/Edit_Icon.vue';
 import Trash_Icon from '@/assets/icons/Trash_Icon.vue';
@@ -63,6 +65,9 @@ import CreateProductModal from '../modals/CreateProductModal.vue';
 import EditProductModal from '../modals/EditProductModal.vue';
 import ConfirmDeleteModal from '../modals/ConfirmDeleteModal.vue';
 import { IProduct } from '@/models/IProduct';
+
+import { useStore } from 'vuex';
+import router from '@/router';
 
 export default defineComponent ({
     components: {
@@ -75,11 +80,17 @@ export default defineComponent ({
     },
 
     setup() {
+        const store = useStore()
+
         const ENTITY_TYPE = ref('product')
         const entityId = ref()
         const productIdToDelete = ref('')
 
-        const products = ref()
+        const products = computed(() => {
+            let data = store.getters['productManagement/getProducts']
+            if(!data) return
+            return data
+        })
 
         const isCreateModalVisible = ref(false)
         const isEditModalVisible = ref(false)
@@ -87,6 +98,25 @@ export default defineComponent ({
 
         const productIdToUpdate = ref('');
         const productToUpdate = ref();
+
+        const openProductDetails = (item: IProduct) => {
+            let id = item.id
+
+            setDataForProductDetails(item)
+
+            router.push({
+                name: 'product-details',
+                params: {
+                    id
+                }
+            })
+        }
+
+        const setDataForProductDetails = (item: IProduct) => {
+            return store.dispatch('productManagement/setProductDetails', {
+                ...item
+            })
+        }
 
         const openCreateProductModal = () => {
             isCreateModalVisible.value = true;
@@ -114,35 +144,49 @@ export default defineComponent ({
         }
 
         const getProducts = async () => {
-            products.value = await loadProducts();
+            // products.value = await loadProducts();
+            return Promise.allSettled([
+                store.dispatch('productManagement/setProducts', {})
+            ])
         }
 
         const updateList = async () => {
-            products.value = await loadProducts();
+            // products.value = await loadProducts();
+            return Promise.allSettled([
+                store.dispatch('productManagement/setProducts', {})
+            ])
         }
 
-        const handleEditProduct = (editedProduct: Partial<IProduct>) => {
+        const handleEditProduct = (editedProduct: any) => {
+            let id = productIdToUpdate.value
+
             editProduct(productIdToUpdate.value, editedProduct)
             .then(() => {
                 closeEditProductModal();
-                updateList();
+                // updateList();
+                // getProducts()
                 productIdToUpdate.value = '';
                 productToUpdate.value = ref();
+                store.dispatch('productManagement/updateProduct', {editedProduct, id})
             });
         }
         
         const handleDeleteProduct = () => {
+            closeDeleteModal()
             deleteProduct(productIdToDelete.value)
             .then(() => {
-                closeDeleteModal();
-                updateList();
+                let id = productIdToDelete.value
+                store.dispatch('productManagement/deleteProduct', id)
                 entityId.value = ''
                 productIdToDelete.value = ''
-            });
+            })
+            .catch((error) => {
+                console.log('error in deleting product', error)
+            })
         }
 
         onMounted(() => {
-            getProducts();
+            if(!products.value) updateList() // not call the
         })
 
         return {
@@ -157,6 +201,7 @@ export default defineComponent ({
 
             handleEditProduct,
             handleDeleteProduct,
+            openProductDetails,
             openCreateProductModal,
             closeCreateProductModal,
             openEditProductModal,

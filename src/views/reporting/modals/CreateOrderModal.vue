@@ -136,6 +136,8 @@ import { loadProducts } from '@/api/reporting/product';
 import { addNewOrder } from '@/api/reporting/order';
 import { IOrder } from '@/models/IOrder';
 
+import { useStore } from 'vuex';
+
 export default defineComponent ({
     components: {
         Close_Icon,
@@ -145,6 +147,8 @@ export default defineComponent ({
     emits: ['close-modal', 'update-list'],
 
     setup(_, context) {
+        const store = useStore()
+
         const buttonEnable = ref()
 
         const productId = ref('')
@@ -204,9 +208,13 @@ export default defineComponent ({
                 newOrderRecord.shippedCountry = shippedCountry.value;
                 newOrderRecord.shippedPostalCode = shippedPostalCode.value;
 
-                addNewOrder(newOrderRecord).then(() => {
-                    updateList();
-                    closeModal();
+                closeModal()
+                addNewOrder(newOrderRecord).then((responseObject) => {
+                    // updateList();
+                    store.dispatch('orderManagement/postOrder', {responseObject})
+                })
+                .catch((error) => {
+                    console.log('error in saving new order', error)
                 })
         }
 

@@ -105,6 +105,8 @@ import { saveNewProduct } from '@/api/reporting/product';
 import { loadCategories } from '@/api/common/categories';
 import { loadSuppliers } from '@/api/reporting/supplier';
 
+import { useStore } from 'vuex';
+
 export default defineComponent ({
     components: {
         Close_Icon,
@@ -114,6 +116,8 @@ export default defineComponent ({
     emits: ['close-modal', 'update-list'],
 
     setup(_, context) {
+        const store = useStore()
+
         const buttonEnable = ref(false)
 
         const productName = ref('')
@@ -147,12 +151,10 @@ export default defineComponent ({
         
         const getCategories = async () => {
             categories.value = await loadCategories();
-            console.log(' download categories ==>')
         }
 
         const getSuppliers = async () => {
             suppliers.value = await loadSuppliers();
-            console.log(' download suppliers')
         }
 
         const addNewProduct = () => {
@@ -164,16 +166,21 @@ export default defineComponent ({
                 newProductRecord.unitsInStock = unitsInStock.value;
                 newProductRecord.unitsOnOrder = unitsOnOrder.value;
 
-                saveNewProduct(newProductRecord).then(() => {
-                    updateList();
-                    closeModal();
-                });
+                closeModal();
+                saveNewProduct(newProductRecord).then((responseObject) => {
+                    store.dispatch('productManagement/postProduct', {responseObject})
+                })
+                .catch((error) => {
+                    console.log('error in saving new product', error)
+                })
         }
 
         const closeModal = () => {
             context.emit('close-modal')
         }
         
+
+        // sample function for emit, not use anymore
         const updateList = () => {
             context.emit('update-list')
         }

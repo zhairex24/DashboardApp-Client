@@ -191,12 +191,11 @@ export default defineComponent ({
         const handleUpdatedProduct = () => {
             let editedProductRecord: Partial<IProduct> = {
                 productName: productName.value,
-                categoryId: categoryIdToUpdate.value,
-                supplierId: supplierIdToUpdate.value,
                 unitPrice: unitPrice.value === '' ? 0 : unitPrice.value,
                 unitsInStock: unitsInStock.value === '' ? 0 : unitsInStock.value,
-                unitsOnOrder: unitsOnOrder.value === '' ? 0 : unitsOnOrder.value
-
+                unitsOnOrder: unitsOnOrder.value === '' ? 0 : unitsOnOrder.value,
+                category: categoryIdToUpdate.value === '' ? presentCategory : categories.value.find((x: any) => x.id === categoryIdToUpdate.value),
+                supplier: supplierIdToUpdate.value === '' ? presentSupplier : suppliers.value.find((x: any) => x.id === supplierIdToUpdate.value)
             }
             
             editProductRecord(editedProductRecord);
