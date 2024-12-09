@@ -7,9 +7,19 @@ const URLS = {
     products: "products/"
 }
 
-export const loadProducts = () => {
+export const loadProducts = (
+    search: string,
+    page: string,
+    page_size: string,
+) => {
     return new Promise((resolve, reject) => {
-        api.get(URLS.products)
+        api.get(URLS.products, {
+            params: {
+                search,
+                page,
+                page_size,
+            }
+        })
         .then((response: AxiosResponse) => {
             if(response.status === 200) {
                 resolve(response.data);
@@ -93,7 +103,7 @@ export const getProductDetails = (productId: string) => {
 
     return new Promise((resolve, reject) => {
       api
-        .get(URLS.products + productId + "/") //, {}
+        .get(URLS.products + productId + "/", {}) //, {}
         .then((response: AxiosResponse) => {
   
           if (response.status === 200) {

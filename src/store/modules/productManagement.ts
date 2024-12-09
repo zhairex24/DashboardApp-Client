@@ -1,6 +1,6 @@
 import { GlobalState } from "../types";
 import { Commit } from "vuex";
-import { loadProducts } from "@/api/reporting/product";
+import { loadProducts } from "@/api/reporting/products";
 import { IProduct } from "@/models/IProduct";
 
 export default {
@@ -35,13 +35,27 @@ export default {
         POST_PRODUCT(state: GlobalState, context: any) {
             state.products.unshift(context.responseObject)
         },
+
+        SET_COUNT(state: GlobalState, context: any) {
+            state.count = context
+        },
+
+        SET_NUMBER_OF_PAGES(state: GlobalState, context: any) {
+            state.numberOfPages = context
+        },
     },
 
     actions: {
-        async setProducts({commit}: {commit: Commit}) {
-            let data = await loadProducts()
+        async setProducts({commit}: {commit: Commit}, payload: any) {
+            let data: any = await loadProducts(
+                payload.search,
+                payload.page,
+                payload.per_page,
+            )
 
-            commit('SET_PRODUCTS', data)
+            commit('SET_PRODUCTS', data.results)
+            commit('SET_COUNT', data.count)
+            commit('SET_NUMBER_OF_PAGES', data.number_of_pages)
 
             return data
         },
@@ -60,7 +74,11 @@ export default {
         
         async postProduct({commit}: {commit: Commit}, payload: any) {
             commit('POST_PRODUCT', payload)
-        }
+        },
+
+        async setNumberOfPages({commit}: {commit: Commit}, payload: any) {
+            commit('SET_NUMBER_OF_PAGES', payload)
+        },
     },
 
     getters: {
@@ -70,6 +88,14 @@ export default {
 
         getProductDetails(state: GlobalState) {
             return state.productDetails
+        },
+
+        getNumberOfPages(state: GlobalState) {
+            return state.numberOfPages
+        },
+
+        getCount(state: GlobalState) {
+            return state.count
         }
     }
 }

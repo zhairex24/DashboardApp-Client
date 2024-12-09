@@ -11,6 +11,21 @@
         </button>
     </header>
 
+    <div class="filters">
+        <div class="filter-wrapper">
+            <p>Search:</p>
+            <input type="text" v-model="search" placeholder="product or category or supplier" @keyup.enter="filterList">
+        </div>
+        <div class="filter-wrapper">
+            <p>Filter:</p>
+            <button id="filter" class="filters_button" @click="filterList">Filter</button>
+        </div>
+        <div class="filter-wrapper">
+            <p>Refresh:</p>
+            <button id="refresh" class="filters_button" @click="refreshList">Refresh</button>
+        </div>
+    </div>
+
     <create-product-modal v-if="isCreateModalVisible" @close-modal="closeCreateProductModal" @update-list="updateList"></create-product-modal>
     <edit-product-modal v-if="isEditModalVisible" @close-modal="closeEditProductModal" :product="productToUpdate" @handle-edit-product="handleEditProduct"></edit-product-modal>
     <confirm-delete-modal v-if="isDeleteModalVisible" @close-modal="closeDeleteModal" @handle-delete-product="handleDeleteProduct" :entity-type="ENTITY_TYPE" :entity-id="entityId"></confirm-delete-modal>
@@ -51,10 +66,13 @@
                 </tr>
             </tbody>
         </table>
+        <pagination v-if="count > 0" :current-page="currentPage" :per-page="perPage" :number-of-pages="numberOfPages" :count="count"
+            @update-page="updatePage" @update-table-size="updateTableSize">
+        </pagination>
     </div>
 </template>
 <script lang="ts">
-import { loadProducts, editProduct, deleteProduct } from '@/api/reporting/product';
+import { loadProducts, editProduct, deleteProduct } from '@/api/reporting/products';
 import { computed, defineComponent, onMounted, ref, toRaw } from 'vue';
 
 import Edit_Icon from '@/assets/icons/Edit_Icon.vue';
@@ -64,6 +82,7 @@ import Plus_Icon from '@/assets/icons/Plus_Icon.vue';
 import CreateProductModal from '../modals/CreateProductModal.vue';
 import EditProductModal from '../modals/EditProductModal.vue';
 import ConfirmDeleteModal from '../modals/ConfirmDeleteModal.vue';
+import Pagination from '@/components/common/Pagination.vue';
 import { IProduct } from '@/models/IProduct';
 
 import { useStore } from 'vuex';
@@ -71,12 +90,13 @@ import router from '@/router';
 
 export default defineComponent ({
     components: {
-        Edit_Icon,
-        Trash_Icon,
-        Plus_Icon,
+        ConfirmDeleteModal,
         CreateProductModal,
+        Edit_Icon,
         EditProductModal,
-        ConfirmDeleteModal
+        Pagination,
+        Plus_Icon,
+        Trash_Icon,
     },
 
     setup() {
@@ -92,12 +112,38 @@ export default defineComponent ({
             return data
         })
 
+        const search = ref()
+
         const isCreateModalVisible = ref(false)
         const isEditModalVisible = ref(false)
         const isDeleteModalVisible = ref(false)
 
         const productIdToUpdate = ref('');
         const productToUpdate = ref();
+
+        const currentPage = ref(1)
+        const perPage = ref(5)
+
+        const numberOfPages = computed(() => {
+            const data = store.getters['paginationManagement/getNumberOfPages']
+            return Number(data)
+        })
+
+        const count = computed(() => {
+            const data = store.getters['paginationManagement/getCount']
+            return Number(data)
+        })
+
+        const updatePage = (page: any) => {
+            currentPage.value = page
+            updateList()
+        }
+
+        const updateTableSize = (pageSize: any) => {
+            perPage.value = pageSize.value
+            currentPage.value = 1
+            updateList()
+        }
 
         const openProductDetails = (item: IProduct) => {
             let id = item.id
@@ -150,11 +196,36 @@ export default defineComponent ({
             ])
         }
 
+        const filterList = () => {
+            currentPage.value = 1
+            updateList()
+        }
+        
+        const refreshList = () => {
+            window.location.reload()
+        }
+
         const updateList = async () => {
             // products.value = await loadProducts();
-            return Promise.allSettled([
-                store.dispatch('productManagement/setProducts', {})
+            // return Promise.allSettled([
+            //     store.dispatch('productManagement/setProducts', {
+            //         search: search.value,
+            //     })
+            // ])
+
+            let data: any = await Promise.allSettled([
+                store.dispatch('productManagement/setProducts', {
+                    search: search.value,
+                    per_page: perPage.value,
+                    page: currentPage.value,
+                })
             ])
+
+            let paginationInfo = data[0].value
+            store.dispatch('paginationManagement/setNumberOfPages', paginationInfo.number_of_pages)
+            store.dispatch('paginationManagement/setCount', paginationInfo.count)
+
+            return data
         }
 
         const handleEditProduct = (editedProduct: any) => {
@@ -192,23 +263,33 @@ export default defineComponent ({
         return {
             ENTITY_TYPE,
             entityId,
+
+            count,
+            currentPage,
             isCreateModalVisible,
             isEditModalVisible,
             isDeleteModalVisible,
+            numberOfPages,
+            perPage,
             products,
             productIdToUpdate,
             productToUpdate,
+            search,
 
+            closeCreateProductModal,
+            closeEditProductModal,
+            closeDeleteModal,
+            filterList,
             handleEditProduct,
             handleDeleteProduct,
             openProductDetails,
             openCreateProductModal,
-            closeCreateProductModal,
             openEditProductModal,
-            closeEditProductModal,
             openDeleteModal,
-            closeDeleteModal,
-            updateList
+            refreshList,
+            updateList,
+            updatePage,
+            updateTableSize,
         }
     }  
 })

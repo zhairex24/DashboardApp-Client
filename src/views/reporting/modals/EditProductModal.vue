@@ -102,8 +102,8 @@ import { defineComponent, onBeforeMount, reactive, ref, watch } from 'vue';
 import { IProduct } from '@/models/IProduct';
 
 import { loadCategories } from '@/api/common/categories';
-import { loadSuppliers } from '@/api/reporting/supplier';
-import { editOrder } from '@/api/reporting/order';
+import { loadSuppliers } from '@/api/reporting/suppliers';
+import { editOrder } from '@/api/reporting/orders';
 
 export default defineComponent ({
     components: {

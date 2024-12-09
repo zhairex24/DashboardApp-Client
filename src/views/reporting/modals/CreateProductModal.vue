@@ -101,9 +101,9 @@ import { defineComponent, onBeforeMount, ref, watch } from 'vue';
 
 import { IProduct } from '@/models/IProduct';
 
-import { saveNewProduct } from '@/api/reporting/product';
+import { saveNewProduct } from '@/api/reporting/products';
 import { loadCategories } from '@/api/common/categories';
-import { loadSuppliers } from '@/api/reporting/supplier';
+import { loadSuppliers } from '@/api/common/suppliers';
 
 import { useStore } from 'vuex';
 

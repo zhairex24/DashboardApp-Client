@@ -61,7 +61,7 @@
 import { computed, defineComponent, onBeforeMount, ref } from 'vue';
 import { useRoute } from 'vue-router'
 
-import { getOrderDetails } from '@/api/reporting/order';
+import { getOrderDetails } from '@/api/reporting/orders';
 
 import Back_Icon from '@/assets/icons/Back_Icon.vue';
 import utils from '@/composables/utils';

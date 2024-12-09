@@ -3,12 +3,12 @@ import api from "../api";
 import { AxiosResponse, AxiosError } from "axios";
 
 const URLS = {
-    suppliers: "suppliers/"
+    cities: "city-filters/"
 }
 
-export const loadSuppliers = () => {
+export const loadCities = () => {
     return new Promise((resolve, reject) => {
-        api.get(URLS.suppliers)
+        api.get(URLS.cities, {})
         .then((response: AxiosResponse) => {
             if(response.status === 200) {
                 resolve(response.data);
@@ -17,7 +17,7 @@ export const loadSuppliers = () => {
             }
         })
         .catch((error: AxiosError) => {
-            console.log('error on load suppliers', error);
+            console.log('error on load cities', error);
         });
     });
 };

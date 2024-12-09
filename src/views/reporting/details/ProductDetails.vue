@@ -57,9 +57,9 @@
 import { computed, defineComponent, onBeforeMount, ref, toRaw } from 'vue';
 import { useRoute } from 'vue-router'
 
-import { getProductDetails } from '@/api/reporting/product';
+import { getProductDetails } from '@/api/reporting/products';
 import { loadCategories } from '@/api/common/categories';
-import { loadSuppliers } from '@/api/reporting/supplier';
+import { loadSuppliers } from '@/api/reporting/suppliers';
 
 import Back_Icon from '@/assets/icons/Back_Icon.vue';
 import utils from '@/composables/utils';

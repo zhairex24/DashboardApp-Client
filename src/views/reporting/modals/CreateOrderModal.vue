@@ -132,8 +132,8 @@ import Modal from '@/components/common/Modal.vue';
 import Close_Icon from '@/assets/icons/Close_Icon.vue';
 import { defineComponent, onBeforeMount, ref, watch } from 'vue';
 import { loadCustomers } from '@/api/relations/customers';
-import { loadProducts } from '@/api/reporting/product';
-import { addNewOrder } from '@/api/reporting/order';
+import { loadProducts } from '@/api/common/products';
+import { addNewOrder } from '@/api/reporting/orders';
 import { IOrder } from '@/models/IOrder';
 
 import { useStore } from 'vuex';

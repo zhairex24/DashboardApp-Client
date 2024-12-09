@@ -3,21 +3,21 @@ import api from "../api";
 import { AxiosResponse, AxiosError } from "axios";
 
 const URLS = {
-    categories: "categories/"
+    suppliers: "suppliers/"
 }
 
-export const loadCategories = () => {
+export const loadSuppliers = () => {
     return new Promise((resolve, reject) => {
-        api.get(URLS.categories, {})
+        api.get(URLS.suppliers, {})
         .then((response: AxiosResponse) => {
             if(response.status === 200) {
-                resolve(response.data.results);
+                resolve(response.data);
             } else {
                 reject();
             }
         })
         .catch((error: AxiosError) => {
-            console.log('error on load categories', error);
+            console.log('error on load suppliers', error);
         });
     });
 };

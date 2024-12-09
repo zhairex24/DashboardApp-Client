@@ -8,4 +8,16 @@ const formatDate1 = (date: Date) => {
     return moment(date).format('YY-MM-DD');
 }
 
-export default { formatDate, formatDate1 }
+const extractValues = (data: any) => {
+    var names = data.map((item: any) => {
+        return item[String(Object.keys(item))]
+    })
+
+    return names;
+}
+
+export default { 
+    formatDate, 
+    formatDate1,
+    extractValues
+}
