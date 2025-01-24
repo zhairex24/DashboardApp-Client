@@ -31,6 +31,23 @@
                     <router-link :to="{name: 'customers'}" class="each">Customers</router-link>
                 </div>
              </section>
+             <section :class="{'is-toggled': toggledViews.includes('administration')}">
+                <a href="#" @click.prevent="toggleViews('administration')">
+                    <Customers_Icon class="nav_icon" :color="colorKey === 'administration' ? activeColor : baseColor"/>
+                    <span>Administration</span>
+                    <MenuToggle_Icon class="menuToggle"/>
+                </a>
+                <div class="subs">
+                <router-link v-if="isAdmin" :to="{name: 'administration'}" class="each">Admin Area</router-link>
+                    <router-link :to="{name: 'user-settings'}" class="each">User Settings</router-link>
+                </div>
+             </section>
+             <section class="nav-section button-nav">
+                <a @click.prevent="logout">
+                    <Logout_Icon class="nav-icon"/>
+                    <span>Log out {{ loggedUser[0].toUpperCase() + loggedUser.slice(1) }}</span>
+                </a>
+             </section>
             </nav>
         </aside>
 
@@ -40,24 +57,37 @@
     </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import router from '@/router';
+import api from '@/api/api';
 
 import Home_Icon from '@/assets/icons/Home_Icon.vue';
 import Customers_Icon from '@/assets/icons/Customers_Icon.vue';
 import MenuToggle_Icon from '@/assets/icons/MenuToggle_Icon.vue';
+import Config_Icon from '@/assets/icons/Config_Icon.vue';
+import Logout_Icon from '@/assets/icons/Logout_Icon.vue';
+
+// permission
+import { get as getFromStore, remove as removeFromStore } from '@/local-storage';
 
 export default defineComponent ({
 
     components: {
         Customers_Icon,
+        Config_Icon,
         Home_Icon,
-        MenuToggle_Icon
+        Logout_Icon,
+        MenuToggle_Icon,
     },
 
     setup() {
         const route = useRoute()
+
+        const loggedUser = computed(() => getFromStore('logged.username') || 'Not logged')
+
+        const isAdmin = computed(() => getFromStore('logged.is_admin'))
+
         const activeColor = ref('#0fadd4')
         const baseColor = ref('white')
         const colorKey = ref('')
@@ -75,13 +105,24 @@ export default defineComponent ({
             }
         }
 
+        const logout = () => {
+            api.cancel()
+            removeFromStore('logged')
+            router.push({
+                name: 'dashboard'
+            })
+        }
+
         return {
-            route,
             activeColor,
             baseColor,
             colorKey,
+            isAdmin,
+            loggedUser,
+            route,
             toggledViews,
-            toggleViews
+            logout,
+            toggleViews,
         }
     }
 })

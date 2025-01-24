@@ -4,6 +4,7 @@ import { GlobalState } from './types'
 import orderManagement from './modules/orderManagement';
 import productManagement from './modules/productManagement';
 import paginationManagement from './modules/paginationManagement';
+import administrationManagement from './modules/administrationManagement';
 
 
 const store = createStore<GlobalState>({
@@ -12,6 +13,7 @@ const store = createStore<GlobalState>({
     orderManagement: orderManagement,
     productManagement: productManagement,
     paginationManagement: paginationManagement,
+    administrationManagement: administrationManagement,
   }
 })
 

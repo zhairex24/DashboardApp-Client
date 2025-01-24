@@ -257,6 +257,7 @@ export default defineComponent ({
         }
 
         onMounted(() => {
+            console.log('count', count.value)
             if(!products.value) updateList() // not call the
         })
 

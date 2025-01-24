@@ -1,6 +1,7 @@
 import { GlobalState } from "./types"
 import { IOrder } from "@/models/IOrder";
 import { IProduct } from "@/models/IProduct";
+import { IPasswordUpdate } from "@/models/IPasswordUpdate";
 
 const state = (): GlobalState => {
     return {
@@ -11,7 +12,10 @@ const state = (): GlobalState => {
         pages: 0,
         pageNumber: 1,
         count: 0,
-        numberOfPages: 0
+        numberOfPages: 0,
+        users: [],
+        user: null as any,
+        passwordUpdate: {} as IPasswordUpdate,
     }
 }
 

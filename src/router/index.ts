@@ -6,6 +6,10 @@ import SuppliersView from '@/views/reporting/screens/SuppliersView.vue'
 import CustomersView from '@/views/relations/screens/CustomersView.vue'
 import OrderDetails from '@/views/reporting/details/OrderDetails.vue'
 import ProductDetails from '@/views/reporting/details/ProductDetails.vue'
+import AdminView from '@/views/administration/AdminView.vue'
+import UserSettings from '@/views/user/screens/UserSettings.vue'
+// permission
+import { get, get as getFromStore } from '@/local-storage'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -50,6 +54,24 @@ const routes: Array<RouteRecordRaw> = [
         component: CustomersView,
         meta: { screen: "customers" }
       },
+      {
+        path: '/administration',
+        name: 'administration',
+        component: AdminView,
+        meta: { screen: "administration" },
+        beforeEnter: (to: any, from: any, next: any) => {
+          const isAdmin = getFromStore('logged.is_admin')
+          if(isAdmin) {
+            next()
+          }
+        }
+      },
+      {
+        path: '/user-settings',
+        name: 'user-settings',
+        component: UserSettings,
+        meta: { screen: "user-settings" }
+      },
     ]
   },
 ]
@@ -57,6 +79,17 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes
+})
+
+router.beforeEach(async(to, from) => {
+  const isLogged = Boolean(getFromStore('logged'))
+  const requiresReset = getFromStore('logged.requires_reset')
+
+  if(!isLogged && to.name !== 'dashboard') {
+    return {name: 'dashboard'}
+  } else if(requiresReset && to.name !== 'user-settings') {
+    return {name: 'user-settings'}
+  }
 })
 
 export default router
